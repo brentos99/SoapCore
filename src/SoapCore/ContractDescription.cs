@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.ServiceModel;
+using System.Xml.Serialization;
 
 namespace SoapCore
 {
@@ -12,6 +13,7 @@ namespace SoapCore
 		public string Namespace { get; private set; }
 		public Type ContractType { get; private set; }
 		public IEnumerable<OperationDescription> Operations { get; private set; }
+		public XmlSerializerNamespaces XmlNs { get; private set; }
 
 		public ContractDescription(ServiceDescription service, Type contractType, ServiceContractAttribute attribute)
 		{
@@ -19,6 +21,11 @@ namespace SoapCore
 			ContractType = contractType;
 			Namespace = attribute.Namespace ?? "http://tempuri.org/"; // Namespace defaults to http://tempuri.org/
 			Name = attribute.Name ?? ContractType.Name; // Name defaults to the type name
+
+			foreach (var ns in contractType.GetTypeInfo().GetCustomAttributes<XmlNamespaceAttribute>())
+			{
+				XmlNs.Add(ns.Prefix, ns.Namespace);
+			}
 
 			var operations = new List<OperationDescription>();
 			foreach (var operationMethodInfo in ContractType.GetTypeInfo().DeclaredMethods)

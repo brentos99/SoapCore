@@ -220,9 +220,10 @@ namespace SoapCore
 
 					// Create response message
 					var resultName = operation.ReturnName;
+
 					var bodyWriter = new ServiceBodyWriter(_serializer, operation.Contract.Namespace, operation.Name + "Response", resultName, responseObject, resultOutDictionary);
 					responseMessage = Message.CreateMessage(_messageEncoder.MessageVersion, null, bodyWriter);
-					responseMessage = new CustomMessage(responseMessage);
+					responseMessage = new CustomMessage(responseMessage, operation.Contract.XmlNs);
 
 					httpContext.Response.ContentType = httpContext.Request.ContentType;
 					httpContext.Response.Headers["SOAPAction"] = responseMessage.Headers.Action;
@@ -344,7 +345,7 @@ namespace SoapCore
 
 			var bodyWriter = new FaultBodyWriter(new Fault { FaultString = errorText });
 			responseMessage = Message.CreateMessage(_messageEncoder.MessageVersion, null, bodyWriter);
-			responseMessage = new CustomMessage(responseMessage);
+			responseMessage = new CustomMessage(responseMessage, null);
 
 			httpContext.Response.ContentType = httpContext.Request.ContentType;
 			httpContext.Response.Headers["SOAPAction"] = responseMessage.Headers.Action;
